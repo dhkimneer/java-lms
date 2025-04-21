@@ -52,3 +52,59 @@
    6. 객체 내 상태 변수의 수를 줄이기 위해 객체 분리
       - AnswerContents, QuestionContents, BaseEntity
    7. 기타 필요 없는 메서드(setter 등) 정리 및 상태 변수 정리
+
+## [2단계] - LMS (My)
+1. 요구사항 정리 
+   1) 과정(Course)는 기수 단위로 운영, 여러 개의 강의를 가질 수 있음
+   2) 강의는 시작일과 종료일을 가진다.
+   3) 강의는 커버 이미지 정보를 가진다.
+   4) 이미지 크기는 1MB 이하여야 한다.
+   5) 이미지 타입은 GIF, JPG(JPEG), PNG, SVG를 허용한다.
+   6) 이미지 width, height은 각각 300px, 200px 이상이어야 하며 width, height 비율은 3:2여야 한다.
+   7) 강의는 무료/유료 강의로 나뉜다.
+   8) 무료 강의는 최대 수강 인원 제한이 없다.
+   9) 유료 강의는 강의 최대 수강 인원을 초과할 수 없다.
+   10) 유료 강의는 수강생의 결제 금액과 수강료가 일치할 때 수강 신청이 가능하다.
+   11) 강의 상태는 준비 중, 모집 중, 종료 3가지로 나뉜다.
+   12) 강의 수강 신청은 강의 상태가 모집 중일 때만 가능하다.
+   13) 유료 강의는 결제가 된 것으로 가정하고 과정을 구현한다.
+   14) 결제 정보는 Payments 모듈에 두며 해당 정보는 Payment 객체에 담아 반환한다.
+
+2. 객체
+   - Course: 과정
+   - Sessions: 강의들 (일급 컬렉션)
+   - Session: 강의
+   - FreeSession: 무료 강의
+   - PaidSession: 유료 강의
+   - Period: 시작일, 종료일 관련 VO
+   - ImageCover: 강의 커버 이미지 관련 VO
+   - SessionStatus: 강의 상태 관련 Enum
+   - MaxCapacity: 강의 최대 수용 인원 관련 원시 객체
+   - TuitionFee: 강의 수강료 관련 원시 객체
+   - ImageType: 이미지 확장자 관련 Enum
+   - EnrollService: 강의 등록 관련 서비스 클래스
+   - SessionRepository: 강의 조회 관련 인터페이스
+   - Payment: 결제 정보 관련 객체
+
+3. 구현 방향
+   - Course -> Sessions -> Session
+   - Session <-(extends) FreeSession, PaidSession
+   - Session -> Period, ImageCover, SessionStatus
+   - PaidSession -> MaxCapacity, TuitionFee
+   - ImageCover -> ImageType
+   - EnrollService -> SessionRepository -> Session
+   - Payment
+
+4. 학습
+   - 객체를 파라미터로 넘기면 해당 객체에 의존하게 되기 때문에, 변경 시 전파된다. 간접 참조 (ex. List<Long>)
+     - 도메인에게 무엇을 시킬 때? (객체 간 협력 + 설계 상 책임 분리 시 도메인 클래스 넘길 수 있음)
+   - 추상 클래스 사용
+   - 엔티티, 도메인 객체 같은 경우, 각 요청마다 새 인스턴스가 생성되므로 공유하지 않음
+   - 스프링 빈에 등록된 객체의 경우 싱글톤이라서 공유
+   - VO: 값 객체로 의미 있는 값 여러 개를 감싸는 객체 (ex. Period)
+   - 원시 객체(Primitive VO): 단 하나의 원시 값을 감싸는 객체 (ex. TuitionFee), VO의 하위 개념
+   - 일급 컬렉션: 하나의 컬렉션을 감싸는 객체, VO의 한 종류
+   - 정적 팩토리 메서드의 경우 직관적인 인터페이스 제공하는 데 좋음
+   - 생성자에는 불변 필수 값만 담는다. 가변 등 X (ex. PaidSession)
+   - 객체는 자기 자신과 관련된 검증만 책임 진다. (ex. validateAccomodation)
+   - 검증 시점은 행위 발생 직전에 한다. (ex. validEnrollCondition)
