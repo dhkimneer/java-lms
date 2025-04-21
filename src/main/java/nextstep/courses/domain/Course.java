@@ -3,11 +3,13 @@ package nextstep.courses.domain;
 import java.time.LocalDateTime;
 
 public class Course {
-    private Long id;
+    private Long id; // 기수?
 
     private String title;
 
     private Long creatorId;
+
+    private Sessions sessions = new Sessions();
 
     private LocalDateTime createdAt;
 
@@ -26,6 +28,14 @@ public class Course {
         this.creatorId = creatorId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+    }
+
+    public void addSession(Session session) {
+        sessions.add(session);
+    }
+
+    public Session getSessionByTerm(int term) {
+        return sessions.getByTerm(term);
     }
 
     public String getTitle() {
