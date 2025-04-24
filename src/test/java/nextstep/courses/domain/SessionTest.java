@@ -5,29 +5,22 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.util.List;
 
-import static nextstep.courses.domain.ImageCoverTest.DEFAULT_IMAGE_COVER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SessionTest {
 
     public static final Session DEFAULT_SESSION = new FreeSession(
-            new Period(LocalDate.now(), LocalDate.now().plusDays(1L)),
-            DEFAULT_IMAGE_COVER
+            new Period(LocalDate.now(), LocalDate.now().plusDays(1L))
     );
 
     @Test
-    @DisplayName("기간이나 이미지 정보는 null일 수 없습니다.")
+    @DisplayName("기간은 null일 수 없습니다.")
     void periodOrImageCoverMustNotBeNull() {
         assertThrows(IllegalArgumentException.class, () ->
-                new FreeSession(null, null));
-
-        assertThrows(IllegalArgumentException.class, () ->
-                new FreeSession(new Period(LocalDate.now(), LocalDate.now()), null));
-
-        assertThrows(IllegalArgumentException.class, () ->
-                new FreeSession(null, DEFAULT_IMAGE_COVER));
+                new FreeSession(null));
     }
 
     @Test
@@ -41,16 +34,19 @@ public class SessionTest {
     void cannotEnrollWhenSessionStatusIsNotEnrolling() {
 
         Session session = new FreeSession(
-                new Period(LocalDate.now(), LocalDate.now().plusDays(1L)),
-                DEFAULT_IMAGE_COVER
+                new Period(LocalDate.now(), LocalDate.now().plusDays(1L))
+        );
+
+        Participants participants = new Participants(
+                List.of(new Participant(session.getId(), 1L))
         );
 
         assertThrows(IllegalStateException.class, () -> {
-            session.enroll(1L, new Payment("1", 0L, 1L, 1L));
+            session.enroll(1L, new Payment("1", 0L, 1L, session.getId()), participants);
         });
 
         session.openEnrollment();
-        session.enroll(1L, new Payment("1", 0L, 1L, 1L));
-        assertThat(session.isParticipant(1L)).isTrue();
+        Participant enrolledParticipant = session.enroll(1L, new Payment("1", 0L, 1L, session.getId()), participants);
+        assertThat(enrolledParticipant.getUserId()).isEqualTo(1L);
     }
 }

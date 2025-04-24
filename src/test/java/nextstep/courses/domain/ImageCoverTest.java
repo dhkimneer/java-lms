@@ -12,7 +12,8 @@ public class ImageCoverTest {
             1024 * 1024,
             "https://d25nznepghf50.cloudfront.net/practice/105/144/3/337f46dc-0d46-4213-9ffe-3cfbc94c15c2.png",
             600,
-            400
+            400,
+            1L
     );
 
     @Test
@@ -24,7 +25,8 @@ public class ImageCoverTest {
                         1024 * 1024,
                         "https://d25nznepghf50.cloudfront.net/practice/105/144/3/337f46dc-0d46-4213-9ffe-3cfbc94c15c2.png",
                         300,
-                        200
+                        200,
+                        1L
                 )).doesNotThrowAnyException();
     }
 
@@ -37,7 +39,8 @@ public class ImageCoverTest {
                     1024 * 1024 + 1,
                     "https://d25nznepghf50.cloudfront.net/practice/105/144/3/337f46dc-0d46-4213-9ffe-3cfbc94c15c2.png",
                     300,
-                    200
+                    200,
+                    1L
             ))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("이미지 크기는 1MB를 초과할 수 없습니다.");
@@ -52,7 +55,8 @@ public class ImageCoverTest {
                                 1024 * 1024,
                                 "https://d25nznepghf50.cloudfront.net/practice/105/144/3/337f46dc-0d46-4213-9ffe-3cfbc94c15c2.png",
                                 300,
-                                200
+                                200,
+                                1L
                         )
                 ).doesNotThrowAnyException();
     }
@@ -66,7 +70,8 @@ public class ImageCoverTest {
                                 1024 * 1024,
                                 "https://d25nznepghf50.cloudfront.net/practice/105/144/3/337f46dc-0d46-4213-9ffe-3cfbc94c15c2.xlsx",
                                 300,
-                                200
+                                200,
+                                1L
                         ))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("이미지 타입은 gif, jpg(jpeg), png, svg 중 하나여야 합니다.");
@@ -81,7 +86,8 @@ public class ImageCoverTest {
                         1024 * 1024,
                         "https://d25nznepghf50.cloudfront.net/practice/105/144/3/337f46dc-0d46-4213-9ffe-3cfbc94c15c2.png",
                         300,
-                        200
+                        200,
+                        1L
                 )).doesNotThrowAnyException();
     }
 
@@ -94,7 +100,8 @@ public class ImageCoverTest {
                         1024 * 1024,
                         "https://d25nznepghf50.cloudfront.net/practice/105/144/3/337f46dc-0d46-4213-9ffe-3cfbc94c15c2.xlsx",
                         350,
-                        200
+                        200,
+                        1L
                 ))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("width, height 비율이 3:2여야 합니다.");
@@ -104,7 +111,8 @@ public class ImageCoverTest {
                         1024 * 1024,
                         "https://d25nznepghf50.cloudfront.net/practice/105/144/3/337f46dc-0d46-4213-9ffe-3cfbc94c15c2.xlsx",
                         100,
-                        150
+                        150,
+                        1L
                 ))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("width, height는 각각 300, 200픽셀 이상이어야 합니다.");
