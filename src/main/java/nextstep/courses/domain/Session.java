@@ -2,39 +2,41 @@ package nextstep.courses.domain;
 
 import nextstep.payments.domain.Payment;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public abstract class Session {
+
+    private Long id;
 
     private Period period; // 시작, 종료일 정보
 
-    private ImageCover imageCover; // 이미지 정보
-
     private SessionStatus sessionStatus = SessionStatus.PREPARING; // 강의 상태
 
-    private List<Long> participants = new ArrayList<>();
+    // type은 도메인에서는 없어도 됨 (다형성으로 처리 가능하기 때문에)
 
-    public Session(Period period, ImageCover imageCover) {
-        validate(period, imageCover); // period, imageCover 자체에 대한 것보다, 필수값 검증
+    public Session(Long id, Period period, SessionStatus sessionStatus) {
+        validate(period); // period 필수값 검증
+        this.id = id;
         this.period = period;
-        this.imageCover = imageCover;
+        this.sessionStatus = sessionStatus;
     }
 
-    private void validate(Period period, ImageCover imageCover) {
+    public Session(Period period) {
+        this(null, period, SessionStatus.PREPARING);
+    }
+
+    private void validate(Period period) {
         if (period == null) {
             throw new IllegalArgumentException("Period cannot be null");
         }
-
-        if (imageCover == null) {
-            throw new IllegalArgumentException("ImageCover cannot be null");
-        }
     }
 
-    public void enroll(Long userId, Payment payment) {
+    public Participant enroll(Long userId, Payment payment, Participants participants) {
         validateSessionStatus();
-        validateEnrollCondition(payment);
-        participants.add(userId);
+        validateEnrollCondition(payment, participants.size());
+
+        Participant participant = new Participant(this.id, userId);
+        participants.add(participant);
+
+        return participant;
     }
 
     private void validateSessionStatus() {
@@ -55,13 +57,17 @@ public abstract class Session {
         return sessionStatus.equals(SessionStatus.PREPARING);
     }
 
-    public boolean isParticipant(long userId) {
-        return participants.contains(userId);
+    public Long getId() {
+        return id;
     }
 
-    public int getParticipantSize() {
-        return participants.size();
+    public Period getPeriod() {
+        return period;
     }
 
-    protected abstract void validateEnrollCondition(Payment payment);
+    public SessionStatus getSessionStatus() {
+        return sessionStatus;
+    }
+
+    protected abstract void validateEnrollCondition(Payment payment, int participantSize);
 }

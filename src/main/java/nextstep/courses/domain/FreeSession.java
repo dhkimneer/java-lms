@@ -4,16 +4,21 @@ import nextstep.payments.domain.Payment;
 
 public class FreeSession extends Session {
 
-    public FreeSession(Period period, ImageCover imageCover) {
-        super(period, imageCover);
+    public FreeSession(Long id, Period period, SessionStatus sessionStatus) {
+        super(id, period, sessionStatus);
+    }
+
+    public FreeSession(Period period) {
+        super(period);
     }
 
     /**
      * 공짜라서 등록 조건을 따로 validate할 필요가 없음
      * @param payment
+     * @param participantSize
      */
     @Override
-    protected void validateEnrollCondition(Payment payment) {
+    protected void validateEnrollCondition(Payment payment, int participantSize) {
 
     }
 }
