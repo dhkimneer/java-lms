@@ -108,3 +108,43 @@
    - 생성자에는 불변 필수 값만 담는다. 가변 등 X (ex. PaidSession)
    - 객체는 자기 자신과 관련된 검증만 책임 진다. (ex. validateAccomodation)
    - 검증 시점은 행위 발생 직전에 한다. (ex. validEnrollCondition)
+
+## [3단계] - DB 적용 (my)
+1. 요구사항 정리
+   1) 2단계에서 구현한 도메인 구조를 유지하면서 DB와 매핑
+   2) 객체 구조 유지를 위해 여러 번 DB 쿼리 실행 가능
+   3) Payment는 매핑 고려하지 않아도 됨
+   4) CRUD
+
+2. 테이블 매핑 : 의존관계 제거/약화에 집중
+   1) Session
+      - ImageCover 의존성 제거 (ImageCover가 '다'쪽이기도 하고, 종속이어서 뺌)
+      - Participants, Participant 의존성 약화 (ex. enroll 시 외부 파라미터를 통한 주입 가능)
+      - 의존성 제거, 약화에 집중
+      - 원시 객체
+   2) ImageCover
+      - session_id를 통한 간접 참조 (직접 참조 X) -> repository를 통해 조회하면 됨
+      - Session : ImageCover = 1 : 다로 외래키 가짐
+   3) Participants
+      - 일급 컬렉션 추가
+   4) Participant (수강생)
+      - 강의, 유저 간 다대다를 해결하기 위한 매핑 테이블
+
+3. CRUD
+   - JDBC를 이용한 쿼리 조회
+   - 테이블 간 직접 참조를 했다면, 매우 복잡했겠으나 의존성 제거/약화로 조회가 매우 간단해짐
+   - 필요한 것은 서비스 단에서 repository 조회를 통해 필요한 것을 주입해주면 끝 (enroll method, 여러 번 DB 쿼리 실행 가능 부분)
+
+4. 학습
+   - 상속 구조를 유지하고, 굳이 Session 하나로 통합하지 않아도 됨. 이렇게 되면 기존 코드에 여러 수정이 가해져야 함 + 복잡해짐
+     -> DB insert 시 instanceOf를 통한 해결, read 시 Enum type을 통해 분기 처리
+     -> 상속 구조를 유지하되, read 시 타입 구별을 위해 SessionType Enum 추가
+   - 의존관계 제거/약화하는 것
+     -> 로직 작성 시 매우 편해짐
+     -> enroll 시 repository에서 조회한 것을 파라미터에 넣어주기만 하면 됨 (외부에서 주입)
+   - 생성자 선언 관련 (this를 통한 생성자 추가, 미리 다른 값 설정 등)
+     -> 생성자에 무엇을 넣느냐?
+   - 원시 객체/VO를 테이블로 구성하는 것 (매핑)
+   - 값이 존재하면, 유효해야 한다.
+     -> 생성하는 단계에서 유효성 통과시키는 것
+   - JDBC template
