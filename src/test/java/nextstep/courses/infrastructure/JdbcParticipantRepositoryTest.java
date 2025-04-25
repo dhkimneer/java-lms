@@ -16,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -73,5 +74,24 @@ class JdbcParticipantRepositoryTest {
         // then
         assertThat(foundParticipants.size()).isEqualTo(2);
         assertThat(foundParticipants.getParticipants()).containsExactlyInAnyOrder(participant1, participant2);
+    }
+
+    @Test
+    @DisplayName("session_id, user_id로 조회")
+    void findBySessionIdAndUserId() {
+        // given
+        FreeSession session = new FreeSession(
+                new Period(LocalDate.now(), LocalDate.now())
+        );
+        Session savedSession = sessionRepository.save(session);
+        Long sessionId = savedSession.getId();
+
+        // when
+        Participant participant1 = new Participant(sessionId, 1L, ApprovalStatus.PENDING);
+        participantRepository.save(sessionId, participant1);
+
+        // then
+        Optional<Participant> participant = participantRepository.findBySessionIdAndUserId(sessionId, participant1.getUserId());
+        assertThat(participant).isEqualTo(Optional.of(participant1));
     }
 }
