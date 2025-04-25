@@ -8,5 +8,5 @@ public interface ImageCoverRepository {
 
     Optional<ImageCover> findById(Long id);
 
-    Optional<ImageCover> findBySessionId(Long sessionId);
+    Optional<ImageCovers> findBySessionId(Long sessionId);
 }

@@ -3,6 +3,7 @@ package nextstep.courses.infrastructure;
 import nextstep.courses.domain.FreeSession;
 import nextstep.courses.domain.ImageCover;
 import nextstep.courses.domain.ImageCoverRepository;
+import nextstep.courses.domain.ImageCovers;
 import nextstep.courses.domain.Period;
 import nextstep.courses.domain.Session;
 import nextstep.courses.domain.SessionRepository;
@@ -14,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -105,9 +107,12 @@ class JdbcImageCoverRepositoryTest {
 
         // when
         ImageCover savedImageCover = imageCoverRepository.save(imageCover);
-        Optional<ImageCover> foundImageCover = imageCoverRepository.findBySessionId(savedImageCover.getSessionId());
+        Optional<ImageCovers> foundImageCovers = imageCoverRepository.findBySessionId(savedImageCover.getSessionId());
 
-        // then
-        assertThat(foundImageCover).isEqualTo(Optional.of(savedImageCover));
+        // then (equals & hashcode)
+        assertThat(foundImageCovers).isPresent();
+
+        List<ImageCover> covers = foundImageCovers.get().getImageCovers();
+        assertThat(covers).contains(savedImageCover);
     }
 }
