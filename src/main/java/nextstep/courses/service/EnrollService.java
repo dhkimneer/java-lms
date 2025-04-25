@@ -19,6 +19,12 @@ public class EnrollService {
         this.participantRepository = participantRepository;
     }
 
+    /**
+     * 수강신청 관련
+     * @param sessionId
+     * @param userId
+     * @param payment
+     */
     @Transactional
     public void enroll(Long sessionId, Long userId, Payment payment) {
         Session session = sessionRepository.findById(sessionId)
@@ -30,5 +36,27 @@ public class EnrollService {
 
         Participant newParticipant = participants.createAndAdd(sessionId, userId);
         participantRepository.save(sessionId, newParticipant);
+    }
+
+    /**
+     * 승인
+     * @param sessionId
+     * @param userId
+     */
+    @Transactional
+    public void approve(Long sessionId, Long userId) {
+        participantRepository.findBySessionIdAndUserId(sessionId, userId)
+                .ifPresent(Participant::approve);
+    }
+
+    /**
+     * 취소
+     * @param sessionId
+     * @param userId
+     */
+    @Transactional
+    public void disapprove(Long sessionId, Long userId) {
+        participantRepository.findBySessionIdAndUserId(sessionId, userId)
+                .ifPresent(Participant::disapprove);
     }
 }
