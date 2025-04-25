@@ -24,10 +24,11 @@ public class EnrollService {
         Session session = sessionRepository.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("Session not found"));
 
-        // service param에는 안 넣음, 조회
         Participants participants = participantRepository.findBySessionId(sessionId);
 
-        Participant enrolledParticipant = session.enroll(userId, payment, participants);
-        participantRepository.save(sessionId, enrolledParticipant);
+        session.validateStatusAndCondition(payment, participants.size());
+
+        Participant newParticipant = participants.createAndAdd(sessionId, userId);
+        participantRepository.save(sessionId, newParticipant);
     }
 }
