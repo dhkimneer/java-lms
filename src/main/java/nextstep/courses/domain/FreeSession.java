@@ -4,8 +4,9 @@ import nextstep.payments.domain.Payment;
 
 public class FreeSession extends Session {
 
-    public FreeSession(Long id, Period period, SessionStatus sessionStatus) {
-        super(id, period, sessionStatus);
+    public FreeSession(Long id, Period period, SessionStatus sessionStatus,
+                       EnrollmentStatus enrollmentStatus) {
+        super(id, period, sessionStatus, enrollmentStatus);
     }
 
     public FreeSession(Period period) {

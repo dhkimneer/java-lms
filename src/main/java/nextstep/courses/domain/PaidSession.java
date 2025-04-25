@@ -11,8 +11,9 @@ public class PaidSession extends Session {
     // 필수 불변 필드만 넣는다.
     public PaidSession(Long id, Period period,
                        SessionStatus sessionStatus,
+                       EnrollmentStatus enrollmentStatus,
                        MaxCapacity maxCapacity, TuitionFee tuitionFee) {
-        super(id, period, sessionStatus);
+        super(id, period, sessionStatus, enrollmentStatus);
         validate(maxCapacity, tuitionFee); // null check
         this.maxCapacity = maxCapacity;
         this.tuitionFee = tuitionFee;
@@ -20,7 +21,8 @@ public class PaidSession extends Session {
 
     public PaidSession(Period period,
                        MaxCapacity maxCapacity, TuitionFee tuitionFee) {
-        this(null, period, SessionStatus.PREPARING, maxCapacity, tuitionFee);
+        this(null, period, SessionStatus.PREPARING,
+                EnrollmentStatus.NON_RECRUITING, maxCapacity, tuitionFee);
     }
 
     private void validate(MaxCapacity maxCapacity, TuitionFee tuitionFee) {
