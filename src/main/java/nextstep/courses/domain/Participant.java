@@ -2,18 +2,30 @@ package nextstep.courses.domain;
 
 import java.util.Objects;
 
-public class Participant { // 원시 객체, 다만 정보 추가 시 사용(단순 매핑 테이블 아님, 엔티티로 봐)
+public class Participant {
 
     private final Long sessionId;
 
     private final Long userId;
 
-    private final ApprovalStatus approvalStatus;
+    private ApprovalStatus approvalStatus;
 
     public Participant(Long sessionId, Long userId, ApprovalStatus approvalStatus) {
         this.sessionId = sessionId;
         this.userId = userId;
         this.approvalStatus = approvalStatus;
+    }
+
+    public void approve() {
+        this.approvalStatus = ApprovalStatus.APPROVED;
+    }
+
+    public void disapprove() {
+        if (ApprovalStatus.PENDING.equals(this.approvalStatus)) {
+            throw new IllegalStateException("대기 중인 자는 취소가 불가능합니다.");
+        }
+
+        this.approvalStatus = ApprovalStatus.DISAPPROVED;
     }
 
     @Override
@@ -38,6 +50,10 @@ public class Participant { // 원시 객체, 다만 정보 추가 시 사용(단
     }
 
     public boolean isApproved() {
-        return ApprovalStatus.APPROVED.equals(approvalStatus);
+        return ApprovalStatus.APPROVED.equals(this.approvalStatus);
+    }
+
+    public boolean isDisapproved() {
+        return ApprovalStatus.DISAPPROVED.equals(this.approvalStatus);
     }
 }
