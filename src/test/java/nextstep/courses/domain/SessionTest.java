@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SessionTest {
@@ -24,29 +25,66 @@ public class SessionTest {
     }
 
     @Test
-    @DisplayName("강의 초기 상태는 준비 중이다.")
+    @DisplayName("강의 초기 상태는 준비 중/비 모집 중이다.")
     void sessionStatusInitIsPreparing() {
         assertThat(DEFAULT_SESSION.isPreparing()).isTrue();
+        assertThat(DEFAULT_SESSION.isNonRecruiting()).isTrue();
     }
 
     @Test
-    @DisplayName("강의 등록 시 '모집 중'이 아닐 경우 등록은 불가능하다.")
-    void cannotEnrollWhenSessionStatusIsNotEnrolling() {
+    @DisplayName("강의 등록 시 '비 모집 중일 경우' 등록은 불가능하다.")
+    void cannotValidateStatusAndConditionWhenNonRecruiting() {
 
         Session session = new FreeSession(
                 new Period(LocalDate.now(), LocalDate.now().plusDays(1L))
         );
 
         Participants participants = new Participants(
-                List.of(new Participant(session.getId(), 1L))
+                List.of(new Participant(session.getId(), 1L, ApprovalStatus.PENDING))
         );
 
         assertThrows(IllegalStateException.class, () -> {
-            session.enroll(1L, new Payment("1", 0L, 1L, session.getId()), participants);
+            session.validateStatusAndCondition(new Payment("1", 0L, 1L, session.getId()), participants.size());
         });
+    }
+
+    @Test
+    @DisplayName("강의 등록 시 '강의가 종료되었을 경우' 등록은 불가능하다.")
+    void cannotValidateStatusAndConditionWhenSessionIsClosed() {
+
+        Session session = new FreeSession(
+                new Period(LocalDate.now(), LocalDate.now().plusDays(1L))
+        );
+
+        Participants participants = new Participants(
+                List.of(new Participant(session.getId(), 1L, ApprovalStatus.PENDING))
+        );
 
         session.openEnrollment();
-        Participant enrolledParticipant = session.enroll(1L, new Payment("1", 0L, 1L, session.getId()), participants);
-        assertThat(enrolledParticipant.getUserId()).isEqualTo(1L);
+        session.close(); // 모집 중, but 종료
+
+        assertThrows(IllegalStateException.class, () -> {
+            session.validateStatusAndCondition(new Payment("1", 0L, 1L, session.getId()), participants.size());
+        });
+    }
+
+    @Test
+    @DisplayName("강의 등록 가능")
+    void canValidateStatusAndCondition() {
+
+        Session session = new FreeSession(
+                new Period(LocalDate.now(), LocalDate.now().plusDays(1L))
+        );
+
+        Participants participants = new Participants(
+                List.of(new Participant(session.getId(), 1L, ApprovalStatus.PENDING))
+        );
+
+        session.openEnrollment();
+        session.startRecruiting();
+
+        assertDoesNotThrow(() -> session.validateStatusAndCondition(
+                new Payment("1", 0L, 1L, session.getId()), participants.size())
+        );
     }
 }

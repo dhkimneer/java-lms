@@ -1,5 +1,6 @@
 package nextstep.courses.infrastructure;
 
+import nextstep.courses.domain.EnrollmentStatus;
 import nextstep.courses.domain.FreeSession;
 import nextstep.courses.domain.MaxCapacity;
 import nextstep.courses.domain.PaidSession;
@@ -33,7 +34,7 @@ public class JdbcSessionRepository implements SessionRepository {
     @Override
     public Session save(Session session) {
 
-        String sql = "insert into session (start_time, end_time, status, type, max_capacity, tuition_fee) values (?, ?, ?, ?, ?, ?)";
+        String sql = "insert into session (start_time, end_time, status, enrollment_status, type, max_capacity, tuition_fee) values (?, ?, ?, ?, ?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -43,14 +44,15 @@ public class JdbcSessionRepository implements SessionRepository {
             ps.setDate(1, Date.valueOf(session.getPeriod().getStartTime()));
             ps.setDate(2, Date.valueOf(session.getPeriod().getEndTime()));
             ps.setString(3, session.getSessionStatus().name());
+            ps.setString(4, session.getEnrollmentStatus().name());
 
-            ps.setString(4, SessionType.from(session).name());
+            ps.setString(5, SessionType.from(session).name());
             if (session instanceof PaidSession) {
-                ps.setInt(5, ((PaidSession) session).getMaxCapacity().getMaxCapacity());
-                ps.setLong(6, ((PaidSession) session).getTuitionFee().getTuitionFee());
+                ps.setInt(6, ((PaidSession) session).getMaxCapacity().getMaxCapacity());
+                ps.setLong(7, ((PaidSession) session).getTuitionFee().getTuitionFee());
             } else {
-                ps.setNull(5, Types.INTEGER);
-                ps.setNull(6, Types.BIGINT);
+                ps.setNull(6, Types.INTEGER);
+                ps.setNull(7, Types.BIGINT);
             }
 
             return ps;
@@ -65,7 +67,7 @@ public class JdbcSessionRepository implements SessionRepository {
     @Override
     public Optional<Session> findById(Long id) {
 
-        String sql = "select id, start_time, end_time, status, type, max_capacity, tuition_fee from session where id = ?";
+        String sql = "select id, start_time, end_time, status, type, max_capacity, tuition_fee, enrollment_status from session where id = ?";
 
         List<Session> result = jdbcTemplate.query(sql, (rs, rowNum) -> {
             Long sessionId = rs.getLong("id");
@@ -77,14 +79,16 @@ public class JdbcSessionRepository implements SessionRepository {
             SessionStatus status = SessionStatus.valueOf(rs.getString("status"));
             SessionType type = SessionType.valueOf(rs.getString("type"));
 
+            EnrollmentStatus enrollmentStatus = EnrollmentStatus.valueOf(rs.getString("enrollment_status"));
+
             if (type == SessionType.FREE) {
-                return new FreeSession(sessionId, period, status);
+                return new FreeSession(sessionId, period, status, enrollmentStatus);
             }
 
             if (type == SessionType.PAID) {
                 MaxCapacity maxCapacity = new MaxCapacity(rs.getInt("max_capacity"));
                 TuitionFee tuitionFee = new TuitionFee(rs.getLong("tuition_fee"));
-                return new PaidSession(sessionId, period, status, maxCapacity, tuitionFee);
+                return new PaidSession(sessionId, period, status, enrollmentStatus, maxCapacity, tuitionFee);
             }
 
             throw new IllegalArgumentException("알 수 없는 강의 유형 : " + type);

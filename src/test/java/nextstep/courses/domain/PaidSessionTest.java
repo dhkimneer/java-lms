@@ -20,13 +20,13 @@ class PaidSessionTest {
         );
 
         Participants participants = new Participants(
-                List.of(new Participant(session.getId(), 1L))
+                List.of(new Participant(session.getId(), 1L, ApprovalStatus.PENDING))
         );
 
         session.openEnrollment();
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            session.enroll(1L, new Payment("1L", 30000L, 1L, session.getId()), participants);
+        Assertions.assertThrows(IllegalStateException.class, () -> {
+            session.validateStatusAndCondition(new Payment("1L", 30000L, 1L, session.getId()), participants.size());
         });
     }
 }

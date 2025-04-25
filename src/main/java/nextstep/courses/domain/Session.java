@@ -10,17 +10,20 @@ public abstract class Session {
 
     private SessionStatus sessionStatus = SessionStatus.PREPARING; // 강의 상태
 
+    private EnrollmentStatus enrollmentStatus; // 모집 상태
+
     // type은 도메인에서는 없어도 됨 (다형성으로 처리 가능하기 때문에)
 
-    public Session(Long id, Period period, SessionStatus sessionStatus) {
+    public Session(Long id, Period period, SessionStatus sessionStatus, EnrollmentStatus enrollmentStatus) {
         validate(period); // period 필수값 검증
         this.id = id;
         this.period = period;
         this.sessionStatus = sessionStatus;
+        this.enrollmentStatus = enrollmentStatus;
     }
 
     public Session(Period period) {
-        this(null, period, SessionStatus.PREPARING);
+        this(null, period, SessionStatus.PREPARING, EnrollmentStatus.NON_RECRUITING);
     }
 
     private void validate(Period period) {
@@ -29,19 +32,14 @@ public abstract class Session {
         }
     }
 
-    public Participant enroll(Long userId, Payment payment, Participants participants) {
-        validateSessionStatus();
-        validateEnrollCondition(payment, participants.size());
-
-        Participant participant = new Participant(this.id, userId);
-        participants.add(participant);
-
-        return participant;
+    public void validateStatusAndCondition(Payment payment, int participantSize) {
+        validateStatus();
+        validateEnrollCondition(payment, participantSize);
     }
 
-    private void validateSessionStatus() {
-        if (!SessionStatus.ENROLLING.equals(this.sessionStatus)) {
-            throw new IllegalStateException("Session is not enrolling.");
+    private void validateStatus() {
+        if (!EnrollmentStatus.RECRUITING.equals(this.enrollmentStatus) || SessionStatus.CLOSED.equals(this.sessionStatus)) {
+            throw new IllegalStateException("수강 신청이 불가능한 상태입니다.");
         }
     }
 
@@ -57,6 +55,8 @@ public abstract class Session {
         return sessionStatus.equals(SessionStatus.PREPARING);
     }
 
+    public boolean isNonRecruiting() { return EnrollmentStatus.NON_RECRUITING.equals(this.enrollmentStatus); }
+
     public Long getId() {
         return id;
     }
@@ -69,5 +69,17 @@ public abstract class Session {
         return sessionStatus;
     }
 
+    public EnrollmentStatus getEnrollmentStatus() {
+        return enrollmentStatus;
+    }
+
     protected abstract void validateEnrollCondition(Payment payment, int participantSize);
+
+    public void close() {
+        this.sessionStatus = SessionStatus.CLOSED;
+    }
+
+    public void startRecruiting() {
+        this.enrollmentStatus = EnrollmentStatus.RECRUITING;
+    }
 }
