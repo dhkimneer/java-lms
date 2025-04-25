@@ -13,15 +13,21 @@ public class Participants {
         this.participants = new ArrayList<>(participants);
     }
 
-    public void add(Participant participant) {
-        if (contains(participant.getUserId())) {
+    public Participant createAndAdd(Long sessionId, Long userId) {
+        if (contains(sessionId, userId)) {
             throw new IllegalArgumentException("이미 등록된 사용자입니다.");
         }
+
+        Participant participant = new Participant(sessionId, userId, ApprovalStatus.PENDING);
         participants.add(participant);
+
+        return participant;
     }
 
-    public boolean contains(Long userId) {
-        return participants.stream().anyMatch(p -> p.getUserId().equals(userId));
+    public boolean contains(Long sessionId, Long userId) {
+        return participants.stream()
+                .anyMatch(p -> p.getSessionId().equals(sessionId) &&
+                        p.getUserId().equals(userId));
     }
 
     public int size() {

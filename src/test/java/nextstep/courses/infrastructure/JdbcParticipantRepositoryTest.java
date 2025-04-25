@@ -1,5 +1,6 @@
 package nextstep.courses.infrastructure;
 
+import nextstep.courses.domain.ApprovalStatus;
 import nextstep.courses.domain.FreeSession;
 import nextstep.courses.domain.Participant;
 import nextstep.courses.domain.ParticipantRepository;
@@ -44,7 +45,7 @@ class JdbcParticipantRepositoryTest {
         Session savedSession = sessionRepository.save(session);
         Long sessionId = savedSession.getId();
 
-        Participant participant = new Participant(sessionId, 1L);
+        Participant participant = new Participant(sessionId, 1L, ApprovalStatus.PENDING);
         int count = participantRepository.save(sessionId, participant);
 
         // when & then
@@ -62,8 +63,8 @@ class JdbcParticipantRepositoryTest {
         Long sessionId = savedSession.getId();
 
         // when
-        Participant participant1 = new Participant(sessionId, 1L);
-        Participant participant2 = new Participant(sessionId, 2L);
+        Participant participant1 = new Participant(sessionId, 1L, ApprovalStatus.PENDING);
+        Participant participant2 = new Participant(sessionId, 2L, ApprovalStatus.PENDING);
         participantRepository.save(sessionId, participant1);
         participantRepository.save(sessionId, participant2);
 

@@ -1,5 +1,6 @@
 package nextstep.courses.infrastructure;
 
+import nextstep.courses.domain.ApprovalStatus;
 import nextstep.courses.domain.Participant;
 import nextstep.courses.domain.ParticipantRepository;
 import nextstep.courses.domain.Participants;
@@ -45,7 +46,8 @@ public class JdbcParticipantRepository implements ParticipantRepository {
                 sql,
                 (rs, rowNum) -> new Participant(
                         rs.getLong("session_id"),
-                        rs.getLong("user_id")
+                        rs.getLong("user_id"),
+                        ApprovalStatus.valueOf(rs.getString("approval_status"))
                 ),
                 sessionId
         );

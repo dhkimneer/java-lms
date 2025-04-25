@@ -8,9 +8,12 @@ public class Participant { // 원시 객체, 다만 정보 추가 시 사용(단
 
     private final Long userId;
 
-    public Participant(Long sessionId, Long userId) {
+    private final ApprovalStatus approvalStatus;
+
+    public Participant(Long sessionId, Long userId, ApprovalStatus approvalStatus) {
         this.sessionId = sessionId;
         this.userId = userId;
+        this.approvalStatus = approvalStatus;
     }
 
     @Override
@@ -28,5 +31,13 @@ public class Participant { // 원시 객체, 다만 정보 추가 시 사용(단
 
     public Long getUserId() {
         return userId;
+    }
+
+    public Long getSessionId() {
+        return sessionId;
+    }
+
+    public boolean isApproved() {
+        return ApprovalStatus.APPROVED.equals(approvalStatus);
     }
 }
