@@ -174,3 +174,5 @@
 3. 기타
    - Repository 간의 직접적인 의존성을 맺는 것 주의
      -> 강 결합 시 유지 보수, 테스트 등에 어려움을 겪을 수 있음. 코드 유연성이 떨어짐
+   - 기타 참고 링크 (db null 관련)
+     -> https://github.com/next-step/java-lms/pull/780#discussion_r2057786160
